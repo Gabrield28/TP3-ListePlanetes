@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ListePlanetes</string>
+    <string name="planete">Planète</string>
+    <string name="certain">Certain</string>
+</resources>
