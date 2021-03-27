@@ -1,115 +1,69 @@
 package com.example.listeplanetes;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Context;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    private ArrayList<String> planetes;
-    ListView listview;
+
+    ListView listView;
     PlaneteAdapter adapter;
+    Data data;
+    Button verify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
-        installePlanetes();
+        // Initializing the listView
+        listView = (ListView) findViewById(R.id.listView);
 
-        listview = (ListView) findViewById(R.id.listView);
+        // Initializing, disabling and setting up the listener for the verify button
+        verify = (Button) findViewById(R.id.button);
+        verify.setEnabled(false);
+        verify.setOnClickListener(verifySizes);
 
-        adapter = new PlaneteAdapter();
-        listview.setAdapter(adapter);
+        // Initializing the data for the planets
+        data = new Data();
 
+        // Initializing the adapter
+        adapter = new PlaneteAdapter(this, data);
+
+        // Setting up the adapter for the listView
+        listView.setAdapter(adapter);
     }
 
-    private void installePlanetes() {
-        planetes = new ArrayList<String>();
-        planetes.add("Mercure");
-        planetes.add("Venus");
-        planetes.add("Terre");
-        planetes.add("Mars");
-        planetes.add("Jupiter");
-        planetes.add("Saturne");
-        planetes.add("Uranus");
-        planetes.add("Neptune");
-        planetes.add("Pluton");
-    }
-
-    class PlaneteAdapter extends BaseAdapter {
+    private View.OnClickListener verifySizes = new View.OnClickListener() {
         @Override
-        public int getCount() {
-            return planetes.size();
-        }
+        public void onClick(View v) {
 
-        @Override
-        public Object getItem(int arg0) {
-            return planetes.get(arg0);
-        }
+            // Récupérer les tailles entrées et les tailles réeles (pour la comparaison)
+            ArrayList sizes = adapter.getSelectedSizes();
+            ArrayList realSizes = adapter.getCorrectSizes();
 
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View itemView = convertView;
-            if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater)    MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                itemView = inflater.inflate(R.layout.listitem, null);
-            }
-            TextView nomPlanete = (TextView) itemView.findViewById(R.id.textView);
-            final CheckBox checkBox = (CheckBox) itemView.findViewById(R.id.checkbox);
-            final Spinner spinner = (Spinner) itemView.findViewById(R.id.spinner);
-
-            nomPlanete.setText(planetes.get(position));
-
-            //  installer l'adaptateur pour la liste déroulante (spinner)
-            String[] taillePlanetes = {"4900", "12000", "12800", "6800", "144000", "120000", "52000", "50000", "2300"};
-            final ArrayAdapter<String> spinadapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, taillePlanetes);
-            spinadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner.setAdapter(spinadapter);
-
-            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    CheckBox checkBox = (CheckBox)  compoundButton.findViewById(R.id.checkbox);
-                    if (checkBox.isChecked()) {
-                        spinner.setEnabled(false);
-                        spinadapter.notifyDataSetChanged();
-                    } else {
-                        spinner.setEnabled(true);
-                        spinadapter.notifyDataSetChanged();
-
-                    }
+            // Comparaison
+            boolean correct = true;
+            for (int i = 0; i < sizes.size(); i++) {
+                int size = (int) sizes.get(i);
+                int realSize = (int) realSizes.get(i);
+                if (size != realSize) {
+                    correct = false;
+                    break;
                 }
-            });
-
-            return itemView;
+            }
+            if (correct == true) {
+                Toast.makeText(MainActivity.this, "Bien joué! Tout est juste.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Il y a au moins une erreur, réessayez.", Toast.LENGTH_SHORT).show();
+            }
         }
-
-    }
-
-
-
-
-
-
-
-
+    };
 }
